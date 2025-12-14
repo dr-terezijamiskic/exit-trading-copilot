@@ -1,12 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import type { TradeDirection } from '@/lib/types';
+import type { TradeDirection, Trade } from '@/lib/types';
 
 export default function NewTradePage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [hasActiveTrades, setHasActiveTrades] = useState(false);
+  const [showWarning, setShowWarning] = useState(false);
+  const [acknowledgedMultiTrade, setAcknowledgedMultiTrade] = useState(false);
   const [formData, setFormData] = useState({
     ticker: '',
     direction: 'LONG' as TradeDirection,
@@ -17,6 +20,35 @@ export default function NewTradePage() {
     is0DTE: false,
     notes: '',
   });
+
+  useEffect(() => {
+    checkForActiveTrades();
+  }, []);
+
+  const checkForActiveTrades = async () => {
+    try {
+      const response = await fetch('/api/trades');
+      if (response.ok) {
+        const trades: Trade[] = await response.json();
+        const activeExists = trades.some(t => t.status === 'ACTIVE');
+        setHasActiveTrades(activeExists);
+        if (activeExists) {
+          setShowWarning(true);
+        }
+      }
+    } catch (error) {
+      console.error('Error checking active trades:', error);
+    }
+  };
+
+  const handleContinueAnyway = () => {
+    setShowWarning(false);
+    setAcknowledgedMultiTrade(true);
+  };
+
+  const handleCancel = () => {
+    router.back();
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,6 +72,20 @@ export default function NewTradePage() {
       if (!response.ok) throw new Error('Failed to create trade');
 
       const trade = await response.json();
+
+      // If user acknowledged multi-trade warning, log it
+      if (acknowledgedMultiTrade) {
+        await fetch('/api/actions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            tradeId: trade.id,
+            type: 'MULTI_TRADE_ACK',
+            payload: { acknowledged: true },
+          }),
+        });
+      }
+
       router.push(`/trade/${trade.id}`);
     } catch (error) {
       console.error('Error creating trade:', error);
@@ -50,6 +96,32 @@ export default function NewTradePage() {
 
   return (
     <div className="max-w-3xl mx-auto">
+      {/* Multi-trade warning modal */}
+      {showWarning && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-card border border-border rounded-lg p-8 max-w-lg mx-4">
+            <h2 className="text-3xl font-bold mb-4">Active Trade Detected</h2>
+            <p className="text-xl mb-6">
+              You already have an active trade. Are you intentionally managing more than one position?
+            </p>
+            <div className="flex gap-4">
+              <button
+                onClick={handleContinueAnyway}
+                className="flex-1 py-4 text-xl font-bold bg-card hover:bg-background border border-border rounded-lg transition-colors"
+              >
+                Continue Anyway
+              </button>
+              <button
+                onClick={handleCancel}
+                className="flex-1 py-4 text-xl font-bold bg-card hover:bg-background border border-border rounded-lg transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <h1 className="text-5xl font-bold mb-8">Pre-Trade Contract</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">

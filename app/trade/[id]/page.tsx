@@ -103,13 +103,17 @@ export default function TradePage() {
   const loadTrade = async () => {
     try {
       const response = await fetch(`/api/trades/${tradeId}`);
-      if (!response.ok) throw new Error('Failed to load trade');
+      if (!response.ok) {
+        // Trade not found - redirect to review page
+        router.push('/review');
+        return;
+      }
       const data = await response.json();
       setTrade(data);
       await loadTimeline();
     } catch (error) {
       console.error('Error loading trade:', error);
-      alert('Failed to load trade');
+      router.push('/review');
     } finally {
       setLoading(false);
     }

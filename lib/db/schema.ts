@@ -42,7 +42,7 @@ export function createTables(db: Database.Database) {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       tradeId INTEGER NOT NULL,
       time TEXT NOT NULL,
-      type TEXT NOT NULL CHECK(type IN ('EXIT', 'REDUCE', 'NOTE', 'OVERRIDE', 'RULE_VIOLATION')),
+      type TEXT NOT NULL CHECK(type IN ('EXIT', 'REDUCE', 'NOTE', 'OVERRIDE', 'RULE_VIOLATION', 'MULTI_TRADE_ACK')),
       payload TEXT NOT NULL,
       FOREIGN KEY (tradeId) REFERENCES trades(id) ON DELETE CASCADE
     )

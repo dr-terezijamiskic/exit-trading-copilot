@@ -1,7 +1,7 @@
 // Trade status types
 export type TradeStatus = 'ACTIVE' | 'EXIT_NOW' | 'CLOSED';
 export type TradeDirection = 'LONG' | 'SHORT';
-export type ActionType = 'EXIT' | 'REDUCE' | 'NOTE' | 'OVERRIDE' | 'RULE_VIOLATION';
+export type ActionType = 'EXIT' | 'REDUCE' | 'NOTE' | 'OVERRIDE' | 'RULE_VIOLATION' | 'MULTI_TRADE_ACK';
 
 // Database models
 export interface Trade {
@@ -65,6 +65,7 @@ export interface ActionPayload {
   note?: string;
   seconds?: number;
   tradeId?: number;
+  acknowledged?: boolean;
 }
 
 // Metrics for review page
