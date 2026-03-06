@@ -464,3 +464,22 @@ npm start
 - Tailwind v4 uses utility classes directly
 - No `@theme` block needed in globals.css
 - Check `DANGER_CLASSES` and `WARNING_CLASSES` constants
+
+
+## Project Structure
+
+/app
+- trade/[id]/page.tsx – Active trade management interface
+- review/page.tsx – Trade history and review
+
+/api
+- /price-updates – Logs price updates and runs rules engine
+- /actions – Logs user actions (exit, reduce, override)
+- /trades – Trade creation and state management
+
+/lib
+- rulesEngine.ts – Core decision logic
+- types.ts – Shared TypeScript types
+
+/database
+- SQLite database for trades, price updates, and actions
