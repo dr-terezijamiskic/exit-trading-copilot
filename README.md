@@ -3,6 +3,11 @@
 # Exit-First Trading Copilot
 
 Manual-first discipline tool for exits and risk reduction. Enforces pre-trade contracts, triggers alarms on invalidation, and tracks rule adherence.
+## Core Idea
+
+Most trading tools try to optimize entries.
+
+This project explores whether software can enforce trading discipline by acting as a behavioral guardrail during a trade.
 
 ## Philosophy
 
